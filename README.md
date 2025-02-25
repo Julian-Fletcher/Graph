@@ -21,14 +21,14 @@
 2. Clone the Repository
 3. Build the Project
 	* **On Linux/macOS:**
-	```bash
+	```sh
 	mkdir build
 	cd build
 	cmake ..
 	cmake --build .
 	```
 	* **On Windows (with CMake and MSVC):**
-	```bash
+	```sh
 	mkdir build && cd build
 	cmake .. -G "Visual Studio 17 2022"
 	cmake --build .
