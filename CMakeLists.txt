@@ -16,6 +16,8 @@ set(CMAKE_CXX_STANDARD 23)
 project(Planar)
 
 # Add executable (src files)
-add_executable(planar src/planar.cpp)
+add_executable(planar 
+					src/planar.cpp 
+					src/tests.cpp)
 # Specify include directories (h files)
 target_include_directories(planar PUBLIC include/)

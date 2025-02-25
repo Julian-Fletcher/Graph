@@ -17,18 +17,26 @@ struct Edge{
 
 struct Node{
 	double radius;				// Radius for obstacles
-	bool obstacle;				// Obstacle check
     unsigned int identity;		// Id starting from 1...n
     int x, y;					// Coordinate
 
     // Constructor for emplace_back
-    Node(bool obstacle, unsigned int identity, int x, int y) : obstacle(obstacle), identity(identity), x(x), y(y) {}
+    Node(unsigned int identity, int x, int y) : identity(identity), x(x), y(y) {}
 };
 
 struct PlanarGraph{
-    std::vector<Node> nodes;
+    std::vector<Node> vertices;
     std::vector<std::vector<Edge>> adj_list;
-	unsigned int size;
+	std::pair<unsigned int, unsigned int> cell_dimensions;		// <cells along x, cells along y>
+	double geom_length;
+	double geom_width;
+	double resolution;
+	unsigned int vertex_count;
+};
+
+struct ObstacleAnalysis{
+	bool valid;				// Quick check whether the edge passes through an obstacle
+	double proximity;		// How close the edge is to the obstacle 
 };
 
 
@@ -42,7 +50,7 @@ struct PlanarGraph{
 */
 PlanarGraph * create_graph(double min_dist, double max_dist, double length, double width, double density);
 
-int calculate_vertices(double length, double width, double density);
+std::pair<unsigned int, unsigned int> calculate_vertices(double length, double width, double density);
 double calculate_angle(double x1, double y1, double x2, double y2);
 double get_distance(int x1, int x2, int y1, int y2, double scale);
 bool edge_intersected(int x1, int y1, int x2, int y2);
@@ -50,7 +58,13 @@ double calculate_angle(double x1, double y1, double x2, double y2);
 void print_vertices(PlanarGraph *g);
 void print_graph(PlanarGraph *g);
 
+// User obstacle function
+ObstacleAnalysis intersect_obstacle(int x1, int x2, int y1, int y2);
 
-void create_obstacles(std::vector<Node> &nodes, std::unordered_set<unsigned int> &obstacles, const unsigned int size);
+// Test Obstacle functions
+void create_obstacles(unsigned int ideal_vertices, double coverage);
+
+// Test Functions
+void distance_tests();
 
 #endif
