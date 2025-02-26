@@ -80,6 +80,9 @@ PlanarGraph * create_graph(double min_dist, double max_dist, double length, doub
 		for(auto &v2 : g->vertices){
 			if(v1.identity >= v2.identity) continue; // Eliminates self loops and duplicates
 
+			// Confirm edge does not exist before anything else
+			if(edge_lookup.find({v1.identity, v2.identity}) != edge_lookup.end()) continue;
+
 			double dist = get_distance(v1.x, v1.y, v2.x, v2.y, resolution);
 
 			// Check distances in O(1) first -- saves time
@@ -105,9 +108,6 @@ PlanarGraph * create_graph(double min_dist, double max_dist, double length, doub
 			// }
 			
 			// After this point all edge checks have been passed, and the edge is valid 
-			
-			// Confirm edge does not exist
-			if(edge_lookup.find({v1.identity, v2.identity}) != edge_lookup.end()) continue;
 
 			double src_angle = calculate_angle(v1.x, v1.y, v2.x, v2.y);
 			
