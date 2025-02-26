@@ -1,4 +1,4 @@
-# True Turn-Radius Constrained Shortest Paths - Implementation
+# Turn-Radius Constrained Pathfinding - Implementation
 
 
 ## Getting Started
