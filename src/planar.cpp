@@ -15,19 +15,31 @@ struct PairHash {
 	}
 };
 
+Point absolute_coordinate(int x, int y, double resolution){
+	return {static_cast<double>(x) / resolution, static_cast<double>(y) / resolution};
+}
+
 // TODO: Obstacle Generation
 // TODO: Proximity Checks & Vehicle size buffer
+
+/* TODO: Proximity and Vehicle Buffer
+* User will pass in the WIDTH of the vehicle
+* This will be used in buffer calculations
+*/
+
+
 /// @brief Creates a 2D geometric graph per the user specifications. Connects based on the specified length scale
 /// @param min_dist Minimum connection distance 
 /// @param max_dist Maximum connection distance
 /// @param length Length of the graph in desired units
 /// @param width Width of the graph in desired units
-/// @param resolution The "cells per unit" of the graph. Positive, nonzero number. 
+/// @param resolution The "cells per unit" of the graph. Positive, number, CAN be zero if there is no width constraint
+/// @param vehicle_width The width of the vehicle being routed to be used in saftey distance calculations Positive, nonzero number. 
 /// @return A constructed graph object
-PlanarGraph * create_graph(double min_dist, double max_dist, double length, double width, double resolution){
+PlanarGraph * create_graph(double min_dist, double max_dist, double length, double width, double resolution, double vehicle_width){
 	
 	// Parameter checking
-	if(min_dist < 0.0 || max_dist < min_dist || length <= 0.0 || width <= 0.0 || resolution <= 0.0) return nullptr;
+	if(min_dist < 0.0 || max_dist < min_dist || length <= 0.0 || width <= 0.0 || resolution <= 0.0 || vehicle_width < 0.0) return nullptr;
 	
 	PlanarGraph *g = new PlanarGraph;
 
@@ -71,12 +83,28 @@ PlanarGraph * create_graph(double min_dist, double max_dist, double length, doub
 			double dist = get_distance(v1.x, v1.y, v2.x, v2.y, resolution);
 
 			// Check distances in O(1) first -- saves time
-			if(dist < min_dist || dist > max_dist ) continue;
+			if(dist < min_dist || dist > max_dist) continue;
 
 			// TODO: Obstacles
-			if(edge_intersected(v1.x, v2.x, v1.y, v2.y) /*|| intersect_obstacle(v1.x, v2.x, v1.y, v2.y)*/){
+			if(edge_intersected(v1.x, v2.x, v1.y, v2.y)){
 				continue;
 			}
+
+			// Finally, check whether edge intersects an obstacle
+			// Convert grid coordinate to user-units -- NAIVE APPROACH (no .5 center-cell approximations)
+			Point absolute_p1 = absolute_coordinate(v1.x, v1.y, resolution);
+			Point absolute_p2 = absolute_coordinate(v2.x, v2.y, resolution);
+
+			// ObstacleAnalysis ob = check_obstacle(absolute_p1, absolute_p2);
+			// if(!ob.valid) {
+			// 	continue;
+			// }
+
+			// if(ob.proximity < vehicle_width/2.0){
+			// 	continue;
+			// }
+			
+			// After this point all edge checks have been passed, and the edge is valid 
 			
 			// Confirm edge does not exist
 			if(edge_lookup.find({v1.identity, v2.identity}) != edge_lookup.end()) continue;
@@ -116,9 +144,6 @@ double get_distance(int x1, int y1, int x2, int y2, double resolution){
 
 	double dx = x2_ - x1_;
 	double dy = y2_ - y1_;
-
-	// std::cout << std::format("Internal distance between ({},{}), ({},{})\n", x1_, y1_, x2_, y2_);
-	// std::cout << std::format("Calculating: SQRT(({} ^ 2) + ({} ^ 2))\n", dx, dy);
 	
 	return std::sqrt(dx * dx + dy * dy);
 }
@@ -165,6 +190,7 @@ bool edge_intersected(int x1, int y1, int x2, int y2) {
 	return false; // No intersection
 }
 
+// Calculates edge angle between two vertices
 double calculate_angle(double x1, double y1, double x2, double y2) {
 	double dx = x2 - x1;
 	double dy = y2 - y1;
@@ -208,7 +234,7 @@ void print_graph(PlanarGraph *g){
 int main(){
 	// std::unordered_set<std::pair<int, int>> obstalce_coordinates;
 	
-	PlanarGraph *g = create_graph(1.0, std::numeric_limits<double>::max(), 10, 10, 1);
+	PlanarGraph *g = create_graph(1.0, std::numeric_limits<double>::max(), 10, 10, 1, 0.0);
 
 	if (g == nullptr || g->adj_list.empty()) {
 		std::cout << "Error: Graph creation failed or graph is empty\n";
@@ -287,7 +313,16 @@ int main(){
 	// create_obstacles(ideal_vertices, .1);
 
 
+	// Point conversion checking 
+	// Point p1 = absolute_coordinate(0, 3, 1);
+	// Point p2 = absolute_coordinate(10,10,2);
+	// Point p3 = absolute_coordinate(100,100,5);
+	// Point p4 = absolute_coordinate(35,23, 3);
+	// Point p5 = absolute_coordinate(100, 3, 13);
 
-
-
+	// std::cout << std::format("================\nPoint 1:\n\tCell/Unit: 1\n\tGrid Coordinates: (0,3)\n\tAbsolute Coordinates: ({},{})\n================\n", p1.x, p1.y);
+	// std::cout << std::format("================\nPoint 2:\n\tCell/Unit: 2\n\tGrid Coordinates: (10,10)\n\tAbsolute Coordinates: ({},{})\n================\n", p2.x, p2.y);
+	// std::cout << std::format("================\nPoint 3:\n\tCell/Unit: 5\n\tGrid Coordinates: (100,100)\n\tAbsolute Coordinates: ({},{})\n================\n", p3.x, p3.y);
+	// std::cout << std::format("================\nPoint 4:\n\tCell/Unit: 3\n\tGrid Coordinates: 35,23)\n\tAbsolute Coordinates: ({},{})\n================\n", p4.x, p4.y);
+	// std::cout << std::format("================\nPoint 5:\n\tCell/Unit: 13\n\tGrid Coordinates: (100,3)\n\tAbsolute Coordinates: ({},{})\n================\n", p5.x, p5.y);
 }

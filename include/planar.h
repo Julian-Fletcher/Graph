@@ -17,9 +17,9 @@ struct Edge{
 
 struct Node{
 	double radius;				// Radius for obstacles
-    unsigned int identity;		// Id starting from 1...n
     int x, y;					// Coordinate
-
+	unsigned int identity;		// Id starting from 1...n
+    
     // Constructor for emplace_back
     Node(unsigned int identity, int x, int y) : identity(identity), x(x), y(y) {}
 };
@@ -34,21 +34,24 @@ struct PlanarGraph{
 	unsigned int vertex_count;
 };
 
+// Structures the user will interact with
+
+/// @brief Return object for 'check_obstacle'
 struct ObstacleAnalysis{
 	bool valid;				// Quick check whether the edge passes through an obstacle
 	double proximity;		// How close the edge is to the obstacle 
 };
 
+/// @brief Parameter passed for 'check_obstacle' containing candidate edge endpoints
+struct Point{
+	double x;
+	double y;
 
-/*
-* Creates graph for user. User must provide function to check obstacles
-* min_dist -> minimum length to connect vertex (meters)
-* max_dist -> maximum length to connect vertex (meters)
-* length -> length of operation area (meters)
-* width -> width of operation area (meters)
-* density -> desired density of the graph (vertecies per unit area [square meters])
-*/
-PlanarGraph * create_graph(double min_dist, double max_dist, double length, double width, double density);
+	Point(double x, double y) : x(x), y(y) {}
+};
+
+
+PlanarGraph * create_graph(double min_dist, double max_dist, double length, double width, double resolution, double vehicle_width);
 
 std::pair<unsigned int, unsigned int> calculate_vertices(double length, double width, double density);
 double calculate_angle(double x1, double y1, double x2, double y2);
@@ -59,7 +62,7 @@ void print_vertices(PlanarGraph *g);
 void print_graph(PlanarGraph *g);
 
 // User obstacle function
-ObstacleAnalysis intersect_obstacle(int x1, int x2, int y1, int y2);
+ObstacleAnalysis check_obstacle(Point p1, Point p2);
 
 // Test Obstacle functions
 void create_obstacles(unsigned int ideal_vertices, double coverage);
