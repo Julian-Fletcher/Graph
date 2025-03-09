@@ -6,7 +6,7 @@
 #include <iostream>
 #include <cmath>
 #include <tuple>
-#include <ranges>
+#include <numbers>
 
 // Custom hash function for std::pair<unsigned int, unsigned int>
 struct PairHash {
@@ -23,8 +23,7 @@ Point absolute_coordinate(int x, int y, double resolution){
 // TODO: Proximity Checks & Vehicle size buffer
 
 /* TODO: Proximity and Vehicle Buffer
-* User will pass in the WIDTH of the vehicle
-* This will be used in buffer calculations
+* User will pass in their safety distance
 */
 
 
@@ -60,7 +59,6 @@ PlanarGraph * create_graph(const double min_dist, const double max_dist, const d
 	// Allocate space in vectors
 	g->vertices.reserve(g->vertex_count);
 	g->adj_list.resize(g->vertex_count);
-	// TODO: Calculate with dimensions
 
 	// Insert vertices based on grid cells
 	unsigned int id = 1;
@@ -93,7 +91,7 @@ PlanarGraph * create_graph(const double min_dist, const double max_dist, const d
 			}
 
 			// Finally, check whether edge intersects an obstacle
-			// Convert grid coordinate to user-units -- NAIVE APPROACH (no .5 center-cell approximations)
+			// Convert grid coordinate to user-units -- BASIC APPROACH (no .5 center-cell approximations) -- needed?
 			Point absolute_p1 = absolute_coordinate(v1.x, v1.y, resolution);
 			Point absolute_p2 = absolute_coordinate(v2.x, v2.y, resolution);
 
@@ -127,7 +125,7 @@ PlanarGraph * create_graph(const double min_dist, const double max_dist, const d
 	return g;
 }
 
-/// @brief Calculates the Euclidian distance between two points given the desired resolution
+/// @brief Calculates the Euclidean distance between two points given the desired resolution
 /// @param x1 X coordinate of first vertex
 /// @param y1 Y coordinate of first vertex
 /// @param x2 X coordinate of second vertex
@@ -197,7 +195,7 @@ double calculate_angle(double x1, double y1, double x2, double y2) {
 	double dy = y2 - y1;
 	
 	double angle = std::atan2(dy, dx);
-	angle *= (180.0 / M_PI);
+	angle *= (180.0 / std::numbers::pi);
 
 	// Normalize to [0, 360)
 	if (angle < 0) {
@@ -246,7 +244,7 @@ int main(){
 	// delete g;
 
 	PlanarGraph *a = create_graph(1.0, std::numeric_limits<double>::max(), 5, 5, 1, .5);
-	PlanarGraph *b = create_graph(1.0, std::numeric_limits<double>::max(), 5, 5, 25.2, .5);
+	// PlanarGraph *b = create_graph(1.0, std::numeric_limits<double>::max(), 5, 5, 25.2, .5);
 	// PlanarGraph *c = create_graph(1.0, std::numeric_limits<double>::max(), 30, 20, .5);
 	// // PlanarGraph *d = create_graph(1.0, 20.0, 500, 500, 2.5);
 	// PlanarGraph *e = create_graph(1.0, std::numeric_limits<double>::max(), 50, 10, 5);
@@ -256,7 +254,7 @@ int main(){
 
 	print_graph(a);
 	std::cout << "\n============================SECOND GRAPH============================\n\n";
-	print_graph(b);
+	// print_graph(b);
 	// print_graph_information(c);
 	// // print_graph_information(d);
 	// print_graph_information(e);
@@ -265,7 +263,7 @@ int main(){
 	// print_graph_information(h);
 
 	delete a;
-	delete b;
+	// delete b;
 	// delete c;
 	// // delete d;
 	// delete e;
@@ -273,11 +271,6 @@ int main(){
 	// // delete g;
 	// delete h;
 
-
-	// std::cout << "DISANCE TESTING" << std::endl;
-	// for(int i : std::views::iota(0,20)){
-	// 	distance_tests();
-	// }
 	
 	// std::cout << std::format("Distance between (0,0) and (2,3) with 1 grid cells / meter: {:.2f}m\n", get_distance(0,0,2,3,1.0));
 	// std::cout << std::format("Distance between (5,5) and (8,9) with 1 grid cell / meter: {:.2f}m\n", get_distance(5, 5, 8, 9, 1.0));
