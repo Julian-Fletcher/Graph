@@ -19,7 +19,7 @@ Point absolute_coordinate(int x, int y, double resolution){
 	return {static_cast<double>(x) / resolution, static_cast<double>(y) / resolution};
 }
 
-// TODO: Obstacle Generation
+
 // TODO: Proximity Checks & Vehicle size buffer
 
 /* TODO: Proximity and Vehicle Buffer
@@ -34,12 +34,12 @@ Point absolute_coordinate(int x, int y, double resolution){
 /// @param length Length of the graph in desired units
 /// @param width Width of the graph in desired units
 /// @param resolution The "cells per unit" of the graph. Positive, number, CAN be zero if there is no width constraint
-/// @param vehicle_width The width of the vehicle being routed to be used in saftey distance calculations Positive, nonzero number. 
+/// @param min_proximity How close something can get to an obstacle
 /// @return A constructed graph object
-PlanarGraph * create_graph(double min_dist, double max_dist, double length, double width, double resolution, double vehicle_width){
+PlanarGraph * create_graph(const double min_dist, const double max_dist, const double length, const double width, const double resolution, const double min_proximity){
 	
 	// Parameter checking
-	if(min_dist < 0.0 || max_dist < min_dist || length <= 0.0 || width <= 0.0 || resolution <= 0.0 || vehicle_width < 0.0) return nullptr;
+	if(min_dist < 0.0 || max_dist < min_dist || length <= 0.0 || width <= 0.0 || resolution <= 0.0 || min_proximity < 0.0) return nullptr;
 	
 	PlanarGraph *g = new PlanarGraph;
 
@@ -74,8 +74,7 @@ PlanarGraph * create_graph(double min_dist, double max_dist, double length, doub
 	// Quick existing-edge lookup
 	std::unordered_set<std::pair<unsigned int, unsigned int>, PairHash> edge_lookup;
 
-    // Conect vertices
-	std::cout << "Connecting vertices\n";
+    // Connect vertices
 	for(auto &v1 : g->vertices){
 		for(auto &v2 : g->vertices){
 			if(v1.identity >= v2.identity) continue; // Eliminates self loops and duplicates
@@ -98,12 +97,14 @@ PlanarGraph * create_graph(double min_dist, double max_dist, double length, doub
 			Point absolute_p1 = absolute_coordinate(v1.x, v1.y, resolution);
 			Point absolute_p2 = absolute_coordinate(v2.x, v2.y, resolution);
 
+			// Check if it failed
 			// ObstacleAnalysis ob = check_obstacle(absolute_p1, absolute_p2);
 			// if(!ob.valid) {
 			// 	continue;
 			// }
 
-			// if(ob.proximity < vehicle_width/2.0){
+			// Confirm not too close
+			// if(ob.proximity < min_proximity){
 			// 	continue;
 			// }
 			
@@ -128,11 +129,11 @@ PlanarGraph * create_graph(double min_dist, double max_dist, double length, doub
 
 /// @brief Calculates the Euclidian distance between two points given the desired resolution
 /// @param x1 X coordinate of first vertex
-/// @param y1 Y coordinat of first vertex
+/// @param y1 Y coordinate of first vertex
 /// @param x2 X coordinate of second vertex
 /// @param y2 Y coordinate of second vertex
 /// @param resolution Resolution parameter given by user
-/// @return The distance between both poionts
+/// @return The distance between both points
 double get_distance(int x1, int y1, int x2, int y2, double resolution){
 	double cell_size = 1.0 / resolution;
 	
@@ -231,26 +232,21 @@ void print_graph(PlanarGraph *g){
 	}
 }
 
-int main(){
-	// std::unordered_set<std::pair<int, int>> obstalce_coordinates;
-	
-	PlanarGraph *g = create_graph(1.0, std::numeric_limits<double>::max(), 10, 10, 1, 0.0);
+int main(){	
+	// PlanarGraph *g = create_graph(1.0, std::numeric_limits<double>::max(), 10, 10, 1, 0.0);
 
-	if (g == nullptr || g->adj_list.empty()) {
-		std::cout << "Error: Graph creation failed or graph is empty\n";
-		return 1;
-	}
+	// if (g == nullptr || g->adj_list.empty()) {
+	// 	std::cout << "Error: Graph creation failed or graph is empty\n";
+	// 	return 1;
+	// }
 
+	// print_vertices(g);
+	// print_graph(g);
 
+	// delete g;
 
-	print_vertices(g);
-	print_graph(g);
-
-	delete g;
-
-	
-	// PlanarGraph *a = create_graph(1.0, std::numeric_limits<double>::max(), 10, 10, 1);
-	// PlanarGraph *b = create_graph(1.0, std::numeric_limits<double>::max(), 10, 10, 5);
+	PlanarGraph *a = create_graph(1.0, std::numeric_limits<double>::max(), 5, 5, 1, .5);
+	PlanarGraph *b = create_graph(1.0, std::numeric_limits<double>::max(), 5, 5, 25.2, .5);
 	// PlanarGraph *c = create_graph(1.0, std::numeric_limits<double>::max(), 30, 20, .5);
 	// // PlanarGraph *d = create_graph(1.0, 20.0, 500, 500, 2.5);
 	// PlanarGraph *e = create_graph(1.0, std::numeric_limits<double>::max(), 50, 10, 5);
@@ -258,8 +254,9 @@ int main(){
 	// // PlanarGraph *g = create_graph(1.0, std::numeric_limits<double>::max(), 32, 32, 2);
 	// PlanarGraph *h = create_graph(1.0, std::numeric_limits<double>::max(), 10, 10, .25);
 
-	// print_graph_information(a);
-	// print_graph_information(b);
+	print_graph(a);
+	std::cout << "\n============================SECOND GRAPH============================\n\n";
+	print_graph(b);
 	// print_graph_information(c);
 	// // print_graph_information(d);
 	// print_graph_information(e);
@@ -267,8 +264,8 @@ int main(){
 	// // print_graph_information(g);
 	// print_graph_information(h);
 
-	// delete a;
-	// delete b;
+	delete a;
+	delete b;
 	// delete c;
 	// // delete d;
 	// delete e;
